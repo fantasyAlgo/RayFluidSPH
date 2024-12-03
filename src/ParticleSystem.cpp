@@ -20,7 +20,7 @@ float smoothingKernelDerivative(float dst){
   return -6*dst*value*value/settings::VOLUME_SR;
 }
 float density2Pressure(float density){
-  return (settings::TARGET_DENSITY - density)*settings::PRESSURE_MULT;
+  return (settings::TARGET_DENSITY - density*10000.0f)*settings::PRESSURE_MULT;
 }
 
 
@@ -60,7 +60,7 @@ void ParticleSystem::updatePressure(){
       if (particles[i].density == 0) particles[i].pressureForce = {0.0001f, 0.0f};
       else 
         particles[i].pressureForce = Vector2Add(particles[i].pressureForce, 
-                                                Vector2Scale(dir, -(slope*settings::PARTICLE_MASS*density2Pressure(particles[i].density))/particles[i].density));
+                                                Vector2Scale(dir, (slope*settings::PARTICLE_MASS*density2Pressure(particles[i].density))/particles[i].density));
       //std::cout << "slope: " << slope << " " << distances[i][j] << " " << smoothingKernel(distances[i][j]) << " " << particles[i].pressureForce.x << " " << particles[i].density << std::endl;
     }
   }
@@ -77,7 +77,7 @@ void ParticleSystem::updateDensity(){
 }
 void ParticleSystem::update(float deltaTime){
   for (int i = 0; i < settings::N_PARTICLES; i++) {
-    particles[i].vel = Vector2Add(Vector2Zero(), Vector2Scale(particles[i].pressureForce, deltaTime));
+    particles[i].vel = Vector2Add(particles[i].vel, Vector2Scale(particles[i].pressureForce, deltaTime));
     //std::cout << particles[i].vel.x << std::endl;
     particles[i].pos = Vector2Add(particles[i].pos, Vector2Scale(particles[i].vel, deltaTime));
     if (particles[i].pos.y < 0 || particles[i].pos.y > settings::SCREEN_HEIGHT){
@@ -95,9 +95,12 @@ void ParticleSystem::render(){
   unsigned char trans_value;
   DrawCircleV(particles[66].pos, settings::SMOOTHING_RAD, RED);
   for (int i = 0; i < settings::N_PARTICLES; i++) {
-    trans_value = std::max(std::min(255, (int)particles[i].density), 0);
+    trans_value = settings::PRESSURE_MULT*(settings::TARGET_DENSITY-particles[i].density*10000.0f) + 125;
     DrawCircleV(particles[i].pos, particles[i].density*10000.0f, {0, 0, 255, 125}); 
-    DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, BLACK);
+    if (trans_value > 0)
+      DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {trans_value, 0 ,trans_value, 255});
+    else DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {0, 255,0, 255});
+    //DrawLineV(particles[i].pos, Vector2Add(particles[i].pos, Vector2Scale(particles[i].pressureForce, 50)), BLACK);
   }
 }
 
@@ -106,7 +109,7 @@ void ParticleSystem::renderUI(){
   ImGui::Text("Adjust the parameters below:");
   ImGui::SliderFloat("smoothing rad:", &settings::SMOOTHING_RAD, 0.0f, 500.0f, "%.1f");
   ImGui::SliderFloat("Pressure mult:", &settings::PRESSURE_MULT, 0.0f, 20.0f, "%.1f");
-  ImGui::SliderFloat("Target density:", &settings::TARGET_DENSITY, 0.0f, 20.0f, "%.1f");
+  ImGui::SliderFloat("Target density:", &settings::TARGET_DENSITY, 0.0f, 10.0f, "%.2f");
   settings::VOLUME_SR = ((float)M_PI*std::pow(settings::SMOOTHING_RAD, 8))/4.0f;
   ImGui::Text("Density at 66: %.6f", particles[66].density);
   ImGui::Text("Pressure x at 66: %.3f %.3f", particles[66].pressureForce.x, particles[66].pressureForce.y);

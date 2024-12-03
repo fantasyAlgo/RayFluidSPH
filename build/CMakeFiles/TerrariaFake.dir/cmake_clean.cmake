@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/TerrariaFake.dir/link.d"
   "CMakeFiles/TerrariaFake.dir/libsSource/imgui.cpp.o"
   "CMakeFiles/TerrariaFake.dir/libsSource/imgui.cpp.o.d"
   "CMakeFiles/TerrariaFake.dir/libsSource/imgui_demo.cpp.o"
