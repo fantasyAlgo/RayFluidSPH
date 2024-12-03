@@ -8,20 +8,30 @@ int main(void)
   InitWindow(settings::SCREEN_WIDTH, settings::SCREEN_HEIGHT, "raylib [core] example - basic window");
   rlImGuiSetup(true);
 
-  SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+  SetTargetFPS(144);               // Set our game to run at 60 frames-per-second
   ParticleSystem particleSystem;
   particleSystem.init();
 
   float deltaTime;
-  while (!WindowShouldClose()) {
-    deltaTime = GetFrameTime();
+  bool runFrame = false;
+  particleSystem.updateDistances();
+  particleSystem.updateDensity();
+  particleSystem.updatePressure();
 
+  while (!WindowShouldClose()) {
+
+    deltaTime = GetFrameTime();
     particleSystem.updateDistances();
     particleSystem.updateDensity();
     particleSystem.updatePressure();
-    particleSystem.update(deltaTime);
+
+    if (runFrame)
+      particleSystem.update(deltaTime);
+    //runFrame = false;
+    if (IsKeyPressed(KEY_A)) runFrame = !runFrame;
     BeginDrawing();
       ClearBackground(RAYWHITE);
+      DrawFPS(10, 10);
       particleSystem.render();
       rlImGuiBegin();
         particleSystem.renderUI();

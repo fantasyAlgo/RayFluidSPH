@@ -1,5 +1,6 @@
 #include "include/Settings.hpp"
 #include <math.h>
+#include <cmath>
 
 namespace settings {
 float SMOOTHING_RAD;
@@ -12,6 +13,7 @@ void init_settings(){
   PARTICLE_MASS = 1.0f;
   TARGET_DENSITY = 6;
   PRESSURE_MULT = 0.6;
+  VOLUME_SR = ((float)M_PI*std::pow(settings::SMOOTHING_RAD, 8))/4.0f;
 
 }
 
