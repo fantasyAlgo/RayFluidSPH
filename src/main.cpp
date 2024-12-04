@@ -21,6 +21,7 @@ int main(void)
   while (!WindowShouldClose()) {
 
     deltaTime = GetFrameTime();
+    particleSystem.updateBase(deltaTime);
     particleSystem.updateDistances();
     particleSystem.updateDensity();
     particleSystem.updatePressure();

@@ -3,11 +3,11 @@
 
 namespace settings {
 
-constexpr int SCREEN_WIDTH = 800;
-constexpr int SCREEN_HEIGHT = 600;
+constexpr int SCREEN_WIDTH = 600;
+constexpr int SCREEN_HEIGHT = 400;
 constexpr int N_PARTICLES = 225;
 constexpr float PARTICLE_RAD = 20;
-constexpr float DAMPING = 0.9;
+constexpr float DAMPING = 0.9f;
 
 extern float SMOOTHING_RAD;
 extern float VOLUME_SR;

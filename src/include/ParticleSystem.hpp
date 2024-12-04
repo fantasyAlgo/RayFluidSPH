@@ -5,6 +5,7 @@
 
 typedef struct Particle {
   Vector2 pos;
+  Vector2 predPos = {0.0f, 0.0f};
   Vector2 vel = {0.0f, 0.0f};
   Vector2 pressureForce;
   float density;
@@ -21,6 +22,7 @@ public:
   void updateDistances();
   void updateDensity();
   void updatePressure();
+  void updateBase(float deltaTime);
   void update(float deltaTime);
   void render();
   void renderUI();
