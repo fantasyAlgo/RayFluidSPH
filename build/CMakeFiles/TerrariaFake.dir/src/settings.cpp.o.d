@@ -1,7 +1,7 @@
 CMakeFiles/TerrariaFake.dir/src/settings.cpp.o: \
- /home/fantasy/Programming/cpp/fluidSimulationExp/src/settings.cpp \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/src/settings.cpp \
  /usr/include/stdc-predef.h \
- /home/fantasy/Programming/cpp/fluidSimulationExp/src/include/Settings.hpp \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/src/include/Settings.hpp \
  /usr/include/c++/14.2.1/math.h /usr/include/c++/14.2.1/cmath \
  /usr/include/c++/14.2.1/bits/requires_hosted.h \
  /usr/include/c++/14.2.1/x86_64-pc-linux-gnu/bits/c++config.h \

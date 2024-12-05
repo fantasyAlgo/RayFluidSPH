@@ -1,8 +1,8 @@
 CMakeFiles/TerrariaFake.dir/src/ParticleSystem.cpp.o: \
- /home/fantasy/Programming/cpp/fluidSimulationExp/src/ParticleSystem.cpp \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/src/ParticleSystem.cpp \
  /usr/include/stdc-predef.h \
- /home/fantasy/Programming/cpp/fluidSimulationExp/src/include/ParticleSystem.hpp \
- /home/fantasy/Programming/cpp/fluidSimulationExp/src/include/Settings.hpp \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/src/include/ParticleSystem.hpp \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/src/include/Settings.hpp \
  /usr/include/raylib.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/stdarg.h \
  /usr/include/c++/14.2.1/algorithm \
@@ -168,9 +168,9 @@ CMakeFiles/TerrariaFake.dir/src/ParticleSystem.cpp.o: \
  /usr/include/c++/14.2.1/bits/basic_ios.tcc \
  /usr/include/c++/14.2.1/bits/ostream.tcc /usr/include/c++/14.2.1/istream \
  /usr/include/c++/14.2.1/bits/istream.tcc \
- /home/fantasy/Programming/cpp/fluidSimulationExp/libs/rlImGui.h \
- /home/fantasy/Programming/cpp/fluidSimulationExp/libs/extras/IconsFontAwesome6.h \
- /home/fantasy/Programming/cpp/fluidSimulationExp/libs/imgui.h \
- /home/fantasy/Programming/cpp/fluidSimulationExp/libs/imconfig.h \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/libs/rlImGui.h \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/libs/extras/IconsFontAwesome6.h \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/libs/imgui.h \
+ /home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/libs/imconfig.h \
  /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/float.h \
  /usr/include/string.h /usr/include/strings.h /usr/include/assert.h

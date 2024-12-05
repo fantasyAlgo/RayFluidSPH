@@ -22,7 +22,7 @@ float smoothingKernelDerivative(float dst){
   return -value * scale;
 }
 float density2Pressure(float density){
-  float diff = density*10000.0f - settings::TARGET_DENSITY;
+  float diff = density*1000000.0f - settings::TARGET_DENSITY;
   return std::max(0.0f, diff)*settings::PRESSURE_MULT;
 }
 
@@ -69,7 +69,8 @@ void ParticleSystem::updatePressure(){
       //std::cout << "slope: " << slope << " " << distances[i][j] << " " << 
       //             smoothingKernel(distances[i][j]) << " " << particles[i].pressureForce.x << " " << particles[i].density << std::endl;
     }
-    particles[i].pressureForce = Vector2ClampValue(particles[i].pressureForce, -20, 20);
+    particles[i].pressureForce.y += 20.0f; 
+    particles[i].pressureForce = Vector2ClampValue(particles[i].pressureForce, -100, 100);
   }
   
 }

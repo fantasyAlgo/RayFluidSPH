@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/fantasy/Programming/cpp/fluidSimulationExp/include -I/home/fantasy/Programming/cpp/fluidSimulationExp/libs
+CXX_INCLUDES = -I/home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/include -I/home/fantasy/Programming/cpp/fluidSim/fluidSimulationExp/libs
 
 CXX_FLAGS = -g -std=gnu++17 -I/usr/include
 
