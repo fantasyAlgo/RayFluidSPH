@@ -17,6 +17,8 @@ class ParticleSystem {
 private:
   Particle particles[settings::N_PARTICLES];
   float distances[settings::N_PARTICLES][settings::N_PARTICLES];
+  int mouseParticle = 0;
+  bool isRepulsionOn = false;
 public:
   void init();
   void updateDistances();
@@ -24,6 +26,7 @@ public:
   void updatePressure();
   void updateBase(float deltaTime);
   void update(float deltaTime);
+  void inputHandling(float deltaTime);
   void render();
   void renderUI();
 };

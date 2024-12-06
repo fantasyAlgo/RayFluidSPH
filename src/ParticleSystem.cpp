@@ -8,6 +8,7 @@
 #include "imgui.h"
 #include <math.h>
 #include <raylib.h>
+#include <stdatomic.h>
 
 
 float smoothingKernel(float dst){
@@ -22,8 +23,8 @@ float smoothingKernelDerivative(float dst){
   return -value * scale;
 }
 float density2Pressure(float density){
-  float diff = density*1000000.0f - settings::TARGET_DENSITY;
-  return std::max(0.0f, diff)*settings::PRESSURE_MULT;
+  float diff = density*10000.0f - settings::TARGET_DENSITY;
+  return diff*settings::PRESSURE_MULT;
 }
 
 
@@ -62,15 +63,21 @@ void ParticleSystem::updatePressure(){
       if (dir.x == 0 && dir.y == 0) dir = Vector2Normalize({(float)(rand()%100), (float)(rand()%100)});
       slope = smoothingKernelDerivative(distances[i][j]);
       sharedPressure = (density2Pressure(particles[i].density) + density2Pressure(particles[j].density))/2.0f;
-      if (particles[i].density == 0) particles[i].pressureForce = {0.0001f, 0.0f};
-      else particles[i].pressureForce = Vector2Add(particles[i].pressureForce, 
-                                        Vector2Scale(dir, -(slope*settings::PARTICLE_MASS*sharedPressure)/particles[i].density));
+      if (i == mouseParticle){
+        //if (Vector2Distance(particles[i].pos, particles[j].pos) < settings::SMOOTHING_RAD)
+          //std::cout << density2Pressure(particles[i].density) << " " << density2Pressure(particles[j].density) << ": " << sharedPressure << std::endl;
+      }
+      particles[i].pressureForce = Vector2Add(particles[i].pressureForce, 
+                                        Vector2Scale(dir, -(slope*settings::PARTICLE_MASS*sharedPressure)/(particles[i].density+0.001f)));
       //std::cout << Vector2Length(this->particles[i].pressureForce) << std::endl;
       //std::cout << "slope: " << slope << " " << distances[i][j] << " " << 
       //             smoothingKernel(distances[i][j]) << " " << particles[i].pressureForce.x << " " << particles[i].density << std::endl;
     }
-    particles[i].pressureForce.y += 20.0f; 
-    particles[i].pressureForce = Vector2ClampValue(particles[i].pressureForce, -100, 100);
+    particles[i].pressureForce.y += 100.0f; 
+    Vector2 mouse_pos = GetMousePosition();
+    if (isRepulsionOn && Vector2Distance(particles[i].pos, mouse_pos) < settings::SMOOTHING_RAD*3)
+      particles[i].pressureForce += Vector2Normalize(Vector2Subtract(particles[i].pos, GetMousePosition()))*(-2000.0f);
+    //particles[i].pressureForce = Vector2ClampValue(particles[i].pressureForce, -100, 100);
   }
   
 }
@@ -86,12 +93,18 @@ void ParticleSystem::updateDensity(){
 
 void ParticleSystem::updateBase(float deltaTime){
   for (int i = 0; i < settings::N_PARTICLES; i++) {
-    particles[i].predPos = Vector2Add(particles[i].predPos, Vector2Scale(particles[i].vel, deltaTime));
+    particles[i].predPos = Vector2Add(particles[i].pos, Vector2Scale(particles[i].vel, deltaTime));
   }
 }
 void ParticleSystem::update(float deltaTime){
   for (int i = 0; i < settings::N_PARTICLES; i++) {
     particles[i].vel = Vector2Add(particles[i].vel, Vector2Scale(particles[i].pressureForce, deltaTime));
+    /*if (i == mouseParticle){
+      std::cout << particles[i].pressureForce.x << " " << particles[i].pressureForce.y << std::endl;
+      std::cout << "Then velocity: " << particles[i].vel.x << " " << particles[i].vel.y << std::endl;
+    }*/
+
+    //particles[i].vel = Vector2ClampValue(particles[i].vel, -100, 100);
     //std::cout << particles[i].vel.x << std::endl;
     particles[i].pos = Vector2Add(particles[i].pos, Vector2Scale(particles[i].vel, deltaTime));
     if (particles[i].pos.y < 0 || particles[i].pos.y > settings::SCREEN_HEIGHT){
@@ -105,18 +118,39 @@ void ParticleSystem::update(float deltaTime){
   }
 
 }
+
+void ParticleSystem::inputHandling(float deltaTime){
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+    float min_dist = 1000000.0f;
+    int indx = 0;
+    Vector2 mouse_pos = GetMousePosition();
+    for (int i = 0; i < settings::N_PARTICLES; i++) {
+      if (min_dist > Vector2Distance(particles[i].pos, mouse_pos)){
+        indx = i;
+        min_dist = Vector2Distance(particles[i].pos, mouse_pos);
+      }
+    }
+    this->mouseParticle = indx;
+  }
+  if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
+    this->particles[mouseParticle].pos = GetMousePosition();
+  }
+  if (IsKeyDown(KEY_Q)) isRepulsionOn = true;
+  else isRepulsionOn = false;
+}
 void ParticleSystem::render(){
   unsigned char trans_value;
   float pressure;
-  DrawCircleV(particles[66].pos, settings::SMOOTHING_RAD, RED);
+  DrawCircleV(particles[this->mouseParticle].pos, settings::SMOOTHING_RAD, RED);
   for (int i = 0; i < settings::N_PARTICLES; i++) {
     pressure = settings::PRESSURE_MULT*(settings::TARGET_DENSITY-particles[i].density*10000.0f);
     trans_value = pressure + 125;
     DrawCircleV(particles[i].pos, particles[i].density*10000.0f, {0, 0, 255, 125}); 
-    if (pressure > 0)
+    DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, BLUE);
+    /*if (pressure > 0)
       DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {trans_value, 0 ,trans_value, 255});
     else if (pressure < 0) DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {0, trans_value, 0, 255});
-    else DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {0, 0, 0, 255});
+    else DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {0, 0, 0, 255});*/
     //DrawLineV(particles[i].pos, Vector2Add(particles[i].pos, Vector2Scale(particles[i].pressureForce, 50)), BLACK);
   }
 }
@@ -125,12 +159,13 @@ void ParticleSystem::renderUI(){
   ImGui::Begin("Parameter Settings"); // Begin window
   ImGui::Text("Adjust the parameters below:");
   ImGui::SliderFloat("smoothing rad:", &settings::SMOOTHING_RAD, 0.0f, 500.0f, "%.1f");
-  ImGui::SliderFloat("Pressure mult:", &settings::PRESSURE_MULT, 0.0f, 100.0f, "%.1f");
+  ImGui::SliderFloat("Pressure mult:", &settings::PRESSURE_MULT, 0.0f, 10000.0f, "%.1f");
   ImGui::SliderFloat("Target density:", &settings::TARGET_DENSITY, 0.0f, 10.0f, "%.4f");
   settings::VOLUME_SR = (M_PI*std::pow(settings::SMOOTHING_RAD, 4))/6.0f;
-  ImGui::Text("Density at 66: %.6f", particles[66].density*10000.0f);
-  ImGui::Text("Pressure x at 66: %.3f %.3f", particles[66].pressureForce.x, particles[66].pressureForce.y);
-  ImGui::Text("Position x at 66: %.3f %.3f", particles[66].pos.x, particles[66].pos.y);
+  ImGui::Text("Density at 66: %.6f", particles[this->mouseParticle].density*10000.0f);
+  ImGui::Text("Pressure x at 66: %.3f %.3f", particles[mouseParticle].pressureForce.x, particles[mouseParticle].pressureForce.y);
+  ImGui::Text("Velocity at 66: %.3f %.3f", particles[mouseParticle].vel.x, particles[mouseParticle].vel.y);
+  ImGui::Text("Position x at 66: %.6f %.6f", particles[mouseParticle].pos.x, particles[mouseParticle].pos.y);
 
   ImGui::End(); // End window
 }

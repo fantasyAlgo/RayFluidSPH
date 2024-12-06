@@ -1427,6 +1427,7 @@ CMakeFiles/TerrariaFake.dir/src/ParticleSystem.cpp.o: /home/fantasy/Programming/
   /usr/include/c++/14.2.1/pstl/execution_defs.h \
   /usr/include/c++/14.2.1/pstl/glue_algorithm_defs.h \
   /usr/include/c++/14.2.1/pstl/pstl_config.h \
+  /usr/include/c++/14.2.1/stdatomic.h \
   /usr/include/c++/14.2.1/stdexcept \
   /usr/include/c++/14.2.1/streambuf \
   /usr/include/c++/14.2.1/string \
@@ -1634,6 +1635,8 @@ TerrariaFake: /usr/lib/ld-linux-x86-64.so.2 \
 /usr/include/c++/14.2.1/streambuf:
 
 /usr/include/c++/14.2.1/stdexcept:
+
+/usr/include/c++/14.2.1/stdatomic.h:
 
 /usr/include/c++/14.2.1/iosfwd:
 

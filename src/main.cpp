@@ -2,8 +2,9 @@
 #include "include/Settings.hpp"
 #include "raylib.h"
 #include "rlImGui.h"
-int main(void)
-{
+
+
+int main(void){
   settings::init_settings();
   InitWindow(settings::SCREEN_WIDTH, settings::SCREEN_HEIGHT, "raylib [core] example - basic window");
   rlImGuiSetup(true);
@@ -13,6 +14,8 @@ int main(void)
   particleSystem.init();
 
   float deltaTime;
+  float fixedDeltaTime = 1.0f/144.0f;
+  fixedDeltaTime*=2.0f;
   bool runFrame = false;
   particleSystem.updateDistances();
   particleSystem.updateDensity();
@@ -21,13 +24,15 @@ int main(void)
   while (!WindowShouldClose()) {
 
     deltaTime = GetFrameTime();
-    particleSystem.updateBase(deltaTime);
+    particleSystem.updateBase(fixedDeltaTime);
+    particleSystem.inputHandling(fixedDeltaTime);
+
     particleSystem.updateDistances();
     particleSystem.updateDensity();
     particleSystem.updatePressure();
 
     if (runFrame)
-      particleSystem.update(deltaTime);
+      particleSystem.update(fixedDeltaTime);
     //runFrame = false;
     if (IsKeyPressed(KEY_A)) runFrame = !runFrame;
     BeginDrawing();
