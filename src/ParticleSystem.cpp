@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include "raymath.h"
+#include <functional>
 #include <iostream>
 #include "rlImGui.h"
 #include "imgui.h"
@@ -43,13 +44,41 @@ void ParticleSystem::init(){
     }
   }
 }
-void ParticleSystem::updateDistances(){
+
+void ParticleSystem::updateChunks(){
+  for (int i = 0; i < settings::NChunksX; i++)
+    for (int j = 0; j < settings::NChunksY; j++) 
+      chunks[i][j].len = 0;
+  int x, y;
   for (int i = 0; i < settings::N_PARTICLES; i++) {
-    for (int j = 0; j < settings::N_PARTICLES; j++) {
-      this->distances[i][j] = Vector2Distance(particles[i].predPos, particles[j].predPos)*1.0f;
-      //std::cout << particles[i].pos.x << " " << particles[j].pos.x << std::endl;
-      //std::cout << this->distances[i][j] << " " << particles[i].pos.x - particles[j].pos.x << std::endl;
+    x = (settings::SCREEN_WIDTH/particles[i].pos.x)*settings::NChunksX;
+    y = (settings::SCREEN_HEIGHT/particles[i].pos.y)*settings::NChunksY;
+    chunks[x][y].indxs[chunks[x][y].len++] = i;
+  }
+}
+
+void ParticleSystem::update(const std::function<void(ParticleSystem&, int, int)>& updateF, int indx, int c_x, int c_y){
+  int indx_p;
+  for (int i = -1; i < 2; i++) {
+    for (int j = -1; j < 2; j++) {
+      for (int k = 0; k < chunks[c_x-i][c_y-j].len; k++) {
+        indx_p =  chunks[c_x-i][c_y-j].indxs[k];
+        updateF(*this, indx, indx_p);
+      }
     }
+  }
+}
+
+void ParticleSystem::updateDistances(){
+  std::function<void(ParticleSystem&, int, int)> f = [](ParticleSystem& p, int indx, int indx_p){
+    p.distances[indx][indx_p] = Vector2Distance(p.particles[indx].predPos, p.particles[indx_p].predPos)*1.0f;
+  };
+
+  int x, y;
+  for (int i = 0; i < settings::N_PARTICLES; i++) {
+    x = (settings::SCREEN_WIDTH/particles[i].pos.x)*settings::NChunksX;
+    y = (settings::SCREEN_HEIGHT/particles[i].pos.y)*settings::NChunksY;
+    this->update(f, i, x, y);
   }
 }
 void ParticleSystem::updatePressure(){
@@ -63,20 +92,13 @@ void ParticleSystem::updatePressure(){
       if (dir.x == 0 && dir.y == 0) dir = Vector2Normalize({(float)(rand()%100), (float)(rand()%100)});
       slope = smoothingKernelDerivative(distances[i][j]);
       sharedPressure = (density2Pressure(particles[i].density) + density2Pressure(particles[j].density))/2.0f;
-      if (i == mouseParticle){
-        //if (Vector2Distance(particles[i].pos, particles[j].pos) < settings::SMOOTHING_RAD)
-          //std::cout << density2Pressure(particles[i].density) << " " << density2Pressure(particles[j].density) << ": " << sharedPressure << std::endl;
-      }
       particles[i].pressureForce = Vector2Add(particles[i].pressureForce, 
                                         Vector2Scale(dir, -(slope*settings::PARTICLE_MASS*sharedPressure)/(particles[i].density+0.001f)));
-      //std::cout << Vector2Length(this->particles[i].pressureForce) << std::endl;
-      //std::cout << "slope: " << slope << " " << distances[i][j] << " " << 
-      //             smoothingKernel(distances[i][j]) << " " << particles[i].pressureForce.x << " " << particles[i].density << std::endl;
     }
     particles[i].pressureForce.y += 100.0f; 
     Vector2 mouse_pos = GetMousePosition();
     if (isRepulsionOn && Vector2Distance(particles[i].pos, mouse_pos) < settings::SMOOTHING_RAD*3)
-      particles[i].pressureForce += Vector2Normalize(Vector2Subtract(particles[i].pos, GetMousePosition()))*(-2000.0f);
+      particles[i].pressureForce += Vector2Scale(Vector2Normalize(Vector2Subtract(particles[i].pos, GetMousePosition())), -2000.0f);
     //particles[i].pressureForce = Vector2ClampValue(particles[i].pressureForce, -100, 100);
   }
   
