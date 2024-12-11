@@ -17,6 +17,7 @@ int main(void){
   float fixedDeltaTime = 1.0f/144.0f;
   fixedDeltaTime*=2.0f;
   bool runFrame = false;
+  particleSystem.updateChunks();
   particleSystem.updateDistances();
   particleSystem.updateDensity();
   particleSystem.updatePressure();
@@ -24,6 +25,7 @@ int main(void){
   while (!WindowShouldClose()) {
 
     deltaTime = GetFrameTime();
+    particleSystem.updateChunks();
     particleSystem.updateBase(fixedDeltaTime);
     particleSystem.inputHandling(fixedDeltaTime);
 

@@ -13,7 +13,7 @@ typedef struct Particle {
 } Particle;
 
 typedef struct Chunk {
-  int len;
+  int len = 0;
   int indxs[settings::N_PARTICLES];
 } Chunk;
 
@@ -26,10 +26,14 @@ private:
   Chunk chunks[settings::NChunksX][settings::NChunksY];
   int mouseParticle = 0;
   bool isRepulsionOn = false;
+  std::function<void(ParticleSystem*, int, int)> distanceF;
+  std::function<void(ParticleSystem*, int, int)> pressureF;
+  std::function<void(ParticleSystem*, int, int)> densityF;
+
 public:
   void init();
 
-  void update(const std::function<void(ParticleSystem&, int, int)>& updateF, int indx, int c_x, int c_y);
+  void update(const std::function<void(ParticleSystem*, int, int)>& updateF, int indx, int c_x, int c_y);
   void updateChunks();
   void updateDistances();
   void updateDensity();

@@ -9,7 +9,7 @@ float PARTICLE_MASS;
 float TARGET_DENSITY;
 float PRESSURE_MULT;
 void init_settings(){
-  SMOOTHING_RAD = 24.4f;
+  SMOOTHING_RAD = 24.0f;
   PARTICLE_MASS = 1.0f;
   TARGET_DENSITY = 0.1f;
   PRESSURE_MULT = 2.0f;

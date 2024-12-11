@@ -5,11 +5,11 @@ namespace settings {
 
 constexpr int SCREEN_WIDTH = 800;
 constexpr int SCREEN_HEIGHT = 600;
-constexpr int N_PARTICLES = 729;
+constexpr int N_PARTICLES = 1000;
 constexpr float PARTICLE_RAD = 20;
 constexpr float DAMPING = 0.9f;
-constexpr int NChunksX = SCREEN_WIDTH/25;
-constexpr int NChunksY = SCREEN_HEIGHT/25;
+constexpr int NChunksX = SCREEN_WIDTH/50;
+constexpr int NChunksY = SCREEN_HEIGHT/50;
 
 extern float SMOOTHING_RAD;
 extern float VOLUME_SR;
