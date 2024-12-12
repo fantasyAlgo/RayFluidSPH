@@ -1,3 +1,0 @@
-/Users/fantasy/Documents/Programming/cpp/fluidSimulationExp/build/CMakeFiles/TerrariaFake.dir
-/Users/fantasy/Documents/Programming/cpp/fluidSimulationExp/build/CMakeFiles/edit_cache.dir
-/Users/fantasy/Documents/Programming/cpp/fluidSimulationExp/build/CMakeFiles/rebuild_cache.dir

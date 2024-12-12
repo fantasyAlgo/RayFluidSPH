@@ -9,15 +9,17 @@ typedef struct Particle {
   Vector2 predPos = {0.0f, 0.0f};
   Vector2 vel = {0.0f, 0.0f};
   Vector2 pressureForce;
+  Vector2 viscosity;
   float density;
 } Particle;
 
 typedef struct Chunk {
   int len = 0;
-  int indxs[settings::N_PARTICLES];
+  int indxs[settings::N_PARTICLES/10];
 } Chunk;
 
-float smoothingKernel(float distance);
+float smoothingKernel(float dst);
+float viscosityKernel(float dst);
 
 class ParticleSystem {
 private:
@@ -26,9 +28,11 @@ private:
   Chunk chunks[settings::NChunksX][settings::NChunksY];
   int mouseParticle = 0;
   bool isRepulsionOn = false;
+  bool isAntiRepulsion = false;
   std::function<void(ParticleSystem*, int, int)> distanceF;
   std::function<void(ParticleSystem*, int, int)> pressureF;
   std::function<void(ParticleSystem*, int, int)> densityF;
+  std::function<void(ParticleSystem*, int, int)> viscosityF;
 
 public:
   void init();
@@ -38,6 +42,7 @@ public:
   void updateDistances();
   void updateDensity();
   void updatePressure();
+  void updateViscosity();
   void updateBase(float deltaTime);
   void update(float deltaTime);
   void inputHandling(float deltaTime);

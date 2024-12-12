@@ -1,4 +1,4 @@
-# Terraria basic clone in raylib and rlImgui
+# Fluid simulation using SPH
 
 ## Prerequisites
 - CMake
@@ -6,27 +6,17 @@
 ## How to run
 This is a cmake project, so as always
 ```bash
-git clone https://github.com/fantasyAlgo/TerrariaCloneRefactor.git
+git clone https://github.com/fantasyAlgo/fluidSimulationExp.git
 mkdir build
 cmake ..
+cd build
 build
-./TerrariaFake
+./FluidSim
 ```
-## Features
-- Lighting, this is made on another thread
-- Block placing, you can place and collect blocks, including torches (there are not a lot really)
-- Zombies at night
-
-TODO:
-- [x] Solve the lighting system
-- [x] Finish the UI, rotate the tiles, add the empty one (e.g make a rect that points to nothing ), add hearts
-- [ ] Style the trees and make the map less dead
-- [ ] Add world saving
-- [x] Make an inventory system
-- [x] Add the possibility to zoom (i guess that's the whole point of this refactor)
-- [x] Make a GUI
-- [ ] World saving
-- [x] Add other entities
-- [ ] Add crafting
-- [ ] Cool water
-
+Then, if you want a stable simulation, start with a low pressure, and increase it to the maximum after
+## Input
+- Q for pushing the particle inwards at the mouse coord 
+- E for push the particle outwards at the mouse coord
+- R to reset the velocities
+- A to stop the simulation
+Click to one particle to see it's position, viscosity, pressure force and velocity

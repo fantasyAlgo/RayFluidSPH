@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
-project(TerrariaFake)
+
+set(PROJECT "FluidSim")
+project(${PROJECT})
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -27,11 +29,11 @@ endif()
 include_directories(include libs/)
 
 # Add executable and link Raylib
-add_executable(TerrariaFake
+add_executable(${PROJECT}
   ${SOURCE_FILES}
   ${LIBS_SOURCE_FILES}
 )
-target_link_libraries(TerrariaFake raylib)
+target_link_libraries(${PROJECT} raylib)
 
 # For custom paths to Raylib, uncomment the following and set RAYLIB_DIR to your path
 # set(RAYLIB_DIR "/path/to/raylib")
@@ -40,7 +42,7 @@ target_link_libraries(TerrariaFake raylib)
 
 # Additional configurations for cross-platform compatibility
 if (APPLE)
-    target_link_libraries(TerrariaFake "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
+  target_link_libraries(${PROJECT} "-framework OpenGL" "-framework Cocoa" "-framework IOKit" "-framework CoreVideo")
 elseif (UNIX AND NOT APPLE)
-    target_link_libraries(TerrariaFake pthread GL dl m)
+  target_link_libraries(${PROJECT} pthread GL dl m)
 endif()

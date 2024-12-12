@@ -5,7 +5,7 @@
 
 
 int main(void){
-  settings::init_settings();
+  settings::init();
   InitWindow(settings::SCREEN_WIDTH, settings::SCREEN_HEIGHT, "raylib [core] example - basic window");
   rlImGuiSetup(true);
 
@@ -31,6 +31,7 @@ int main(void){
 
     particleSystem.updateDistances();
     particleSystem.updateDensity();
+    particleSystem.updateViscosity();
     particleSystem.updatePressure();
 
     if (runFrame)
