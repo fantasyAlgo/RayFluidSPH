@@ -6,15 +6,16 @@
 
 int main(void){
   settings::init();
+  settings::update();
   InitWindow(settings::SCREEN_WIDTH, settings::SCREEN_HEIGHT, "raylib [core] example - basic window");
   rlImGuiSetup(true);
 
-  SetTargetFPS(144);               // Set our game to run at 60 frames-per-second
+  SetTargetFPS(144);
   ParticleSystem particleSystem;
   particleSystem.init();
 
   float deltaTime;
-  float fixedDeltaTime = 1.0f/144.0f;
+  float fixedDeltaTime = 1.0f/160.0f;
   fixedDeltaTime*=2.0f;
   bool runFrame = false;
   particleSystem.updateChunks();

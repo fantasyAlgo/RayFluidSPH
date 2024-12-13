@@ -10,7 +10,8 @@ typedef struct Particle {
   Vector2 vel = {0.0f, 0.0f};
   Vector2 pressureForce;
   Vector2 viscosity;
-  float density;
+  float density = 0;
+  float nearDensity = 0;
 } Particle;
 
 typedef struct Chunk {
@@ -20,6 +21,9 @@ typedef struct Chunk {
 
 float smoothingKernel(float dst);
 float viscosityKernel(float dst);
+
+float smoothingNearKernel(float dst);
+float smoothingNearKernelDer(float dst);
 
 class ParticleSystem {
 private:

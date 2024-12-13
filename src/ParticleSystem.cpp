@@ -23,6 +23,16 @@ float smoothingKernelDerivative(float dst){
   float scale = 12.0f/(pow(settings::SMOOTHING_RAD, 4)*M_PI);
   return -value * scale;
 }
+float smoothingNearKernel(float dst){
+  if (dst >= settings::SMOOTHING_RAD) return 0;
+  float value = std::max(0.0f, settings::SMOOTHING_RAD - dst);
+  return (value*value*value) / settings::SpikyPow3ScalingFactor;
+}
+float smoothingNearKernelDer(float dst){
+  if (dst >= settings::SMOOTHING_RAD) return 0;
+  float value = std::max(0.0f, settings::SMOOTHING_RAD - dst);
+  return -(value*value) / settings::SpikyPow3DerScalingFactor;
+}
 
 float viscosityKernel(float dst){
   if (dst >= settings::SMOOTHING_RAD) return 0;
@@ -33,6 +43,9 @@ float viscosityKernel(float dst){
 float density2Pressure(float density){
   float diff = density*10000.0f - settings::TARGET_DENSITY;
   return diff*settings::PRESSURE_MULT;
+}
+float nearDensity2Pressure(float density){
+  return density*settings::NEAR_PRESSURE_MULT;
 }
 
 
@@ -54,19 +67,28 @@ void ParticleSystem::init(){
     p->distances[indx][indx_p] = Vector2Distance(p->particles[indx].predPos, p->particles[indx_p].predPos)*1.0f;
   };
   this->pressureF = [this](ParticleSystem* p, int i, int j){
-    float slope, sharedPressure;
+    float slope, sharedPressure, nearSlope, nearSharedPressure;
     Vector2 dir;
     if (i == j) return;
     dir = Vector2Normalize(Vector2Subtract(p->particles[i].predPos, p->particles[j].predPos));
     if (dir.x == 0 && dir.y == 0) dir = Vector2Normalize({(float)(rand()%100), (float)(rand()%100)});
+
     slope = smoothingKernelDerivative(p->distances[i][j]);
+    nearSlope = smoothingKernelDerivative(p->distances[i][j]);
+
     sharedPressure = (density2Pressure(p->particles[i].density) + density2Pressure(p->particles[j].density))/2.0f;
-    p->particles[i].pressureForce = Vector2Add(p->particles[i].pressureForce, 
-                                      Vector2Scale(dir, -(slope*settings::PARTICLE_MASS*sharedPressure)/(p->particles[i].density+0.001f)));
+    nearSharedPressure = (nearDensity2Pressure(p->particles[i].nearDensity) + nearDensity2Pressure(p->particles[j].nearDensity))/2.0f;
+    
+    p->particles[i].pressureForce = p->particles[i].pressureForce + 
+                                      dir*(-(slope*settings::PARTICLE_MASS*sharedPressure)/(p->particles[i].density+0.001f));
+    p->particles[i].pressureForce = p->particles[i].pressureForce + 
+                                      dir*(-(nearSlope*settings::PARTICLE_MASS*nearSharedPressure)/(p->particles[i].nearDensity+0.001f));
+
   };
   this->densityF = [this](ParticleSystem* p, int i, int j){
     if (i == j) return;
     p->particles[i].density += smoothingKernel(p->distances[i][j]);
+    p->particles[i].nearDensity += smoothingNearKernel(p->distances[i][j]);
   };
   this->viscosityF = [this](ParticleSystem* p, int i, int j){
     float influence = viscosityKernel(p->distances[i][j]);
@@ -123,8 +145,8 @@ void ParticleSystem::updatePressure(){
     y = (particles[i].pos.y/(float)settings::SCREEN_HEIGHT)*settings::NChunksY;
     this->update(this->pressureF, i, x, y);
 
-    // Gravity
     particles[i].pressureForce += particles[i].viscosity;
+    // Gravity
     particles[i].pressureForce.y += 100.0f; 
 
     Vector2 mouse_pos = GetMousePosition();
@@ -221,9 +243,9 @@ void ParticleSystem::render(){
   DrawCircleV(particles[this->mouseParticle].pos, settings::SMOOTHING_RAD, RED);
   for (int i = 0; i < settings::N_PARTICLES; i++) {
     pressure = settings::PRESSURE_MULT*(settings::TARGET_DENSITY-particles[i].density*10000.0f);
-    trans_value = Vector2Length(particles[i].vel)*10.0f;
+    trans_value = Vector2Length(particles[i].vel)*5.0f;
     DrawCircleV(particles[i].pos, particles[i].density*10000.0f, {0, 0, 255, 125}); 
-    DrawCircleV(particles[i].pos, settings::SMOOTHING_RAD/2, {(unsigned char)trans_value, 0, (unsigned char)(255-trans_value), 255});
+    DrawCircleV(particles[i].pos, settings::SMOOTHING_RAD/3, {(unsigned char)trans_value, 0, (unsigned char)(255-trans_value), 255});
     /*if (pressure > 0)
       DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {trans_value, 0 ,trans_value, 255});
     else if (pressure < 0) DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {0, trans_value, 0, 255});
@@ -237,12 +259,14 @@ void ParticleSystem::renderUI(){
   ImGui::Text("Adjust the parameters below:");
   ImGui::SliderFloat("smoothing rad:", &settings::SMOOTHING_RAD, 0.0f, 80.0f, "%.1f");
   ImGui::SliderFloat("Pressure mult:", &settings::PRESSURE_MULT, 0.0f, 10000.0f, "%.1f");
-  ImGui::SliderFloat("Target density:", &settings::TARGET_DENSITY, 0.0f, 1.0f, "%.4f");
+  ImGui::SliderFloat("Target density:", &settings::TARGET_DENSITY, 0.0f, 5.0f, "%.4f");
   ImGui::SliderFloat("VISCOSITY_STRENGTH:", &settings::VISCOSITY_STRENGTH, -100.0f, 100.0f, "%.4f");
+  ImGui::SliderFloat("Near pressure mult:", &settings::NEAR_PRESSURE_MULT, 0.0f, 10000.0f, "%.4f");
   settings::update();
 
 
   ImGui::Text("Density at 66: %.6f", particles[this->mouseParticle].density*10000.0f);
+  ImGui::Text("Near density at 66: %.6f", particles[this->mouseParticle].nearDensity*10000.0f);
   ImGui::Text("Pressure x at 66: %.3f %.3f", particles[mouseParticle].pressureForce.x, particles[mouseParticle].pressureForce.y);
   ImGui::Text("viscosity x at 66: %.3f %.3f", particles[mouseParticle].viscosity.x, particles[mouseParticle].viscosity.y);
   ImGui::Text("Velocity at 66: %.3f %.3f", particles[mouseParticle].vel.x, particles[mouseParticle].vel.y);
