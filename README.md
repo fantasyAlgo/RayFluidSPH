@@ -1,5 +1,5 @@
 # Fluid simulation using SPH
-
+![fluidSimulation](https://github.com/user-attachments/assets/7f56a920-585c-4ce9-8889-2b1f4a9f4c3b)
 ## Prerequisites
 - CMake
 - Raylib, Cmake will automatically install it if you don't have it locally
