@@ -13,8 +13,7 @@
 
 
 float smoothingKernel(float dst){
-  if (dst >= settings::SMOOTHING_RAD) return 0;
-  float value = std::max(0.0f, settings::SMOOTHING_RAD- dst);
+  if (dst >= settings::SMOOTHING_RAD) return 0; float value = std::max(0.0f, settings::SMOOTHING_RAD- dst);
   return (value*value) / settings::VOLUME_SR;
 }
 float smoothingKernelDerivative(float dst){
@@ -63,35 +62,38 @@ void ParticleSystem::init(){
       indx++;
     }
   }
-  this->distanceF = [this](ParticleSystem* p, int indx, int indx_p){
-    p->distances[indx][indx_p] = Vector2Distance(p->particles[indx].predPos, p->particles[indx_p].predPos)*1.0f;
-  };
+  /*this->distanceF = [this](ParticleSystem* p, int indx, int indx_p){
+    //p->distances[indx][indx_p] = Vector2Distance(p->particles[indx].predPos, p->particles[indx_p].predPos)*1.0f;
+  };*/
   this->pressureF = [this](ParticleSystem* p, int i, int j){
     float slope, sharedPressure, nearSlope, nearSharedPressure;
     Vector2 dir;
     if (i == j) return;
+    float distance = p->getDistance(i, j);
     dir = Vector2Normalize(Vector2Subtract(p->particles[i].predPos, p->particles[j].predPos));
     if (dir.x == 0 && dir.y == 0) dir = Vector2Normalize({(float)(rand()%100), (float)(rand()%100)});
 
-    slope = smoothingKernelDerivative(p->distances[i][j]);
-    nearSlope = smoothingKernelDerivative(p->distances[i][j]);
+    slope = smoothingKernelDerivative(distance);
+    nearSlope = smoothingKernelDerivative(distance);
 
     sharedPressure = (density2Pressure(p->particles[i].density) + density2Pressure(p->particles[j].density))/2.0f;
     nearSharedPressure = (nearDensity2Pressure(p->particles[i].nearDensity) + nearDensity2Pressure(p->particles[j].nearDensity))/2.0f;
-    
     p->particles[i].pressureForce = p->particles[i].pressureForce + 
                                       dir*(-(slope*settings::PARTICLE_MASS*sharedPressure)/(p->particles[i].density+0.001f));
     p->particles[i].pressureForce = p->particles[i].pressureForce + 
                                       dir*(-(nearSlope*settings::PARTICLE_MASS*nearSharedPressure)/(p->particles[i].nearDensity+0.001f));
+    
+    //std::cout << nearSharedPressure << " " << p->particles[i].pressureForce.x << std::endl;
 
   };
   this->densityF = [this](ParticleSystem* p, int i, int j){
     if (i == j) return;
-    p->particles[i].density += smoothingKernel(p->distances[i][j]);
-    p->particles[i].nearDensity += smoothingNearKernel(p->distances[i][j]);
+    float distance = p->getDistance(i, j);
+    p->particles[i].density += smoothingKernel(distance);
+    p->particles[i].nearDensity += smoothingNearKernel(distance);
   };
   this->viscosityF = [this](ParticleSystem* p, int i, int j){
-    float influence = viscosityKernel(p->distances[i][j]);
+    float influence = viscosityKernel(p->getDistance(i, j));
     p->particles[i].viscosity += (p->particles[i].vel - p->particles[j].vel)*influence;
   };
 
@@ -130,6 +132,7 @@ void ParticleSystem::update(const std::function<void(ParticleSystem*, int, int)>
 }
 
 void ParticleSystem::updateDistances(){
+  return;
   int x, y;
   for (int i = 0; i < settings::N_PARTICLES; i++) {
     x = (particles[i].pos.x/(float)settings::SCREEN_WIDTH)*settings::NChunksX;
@@ -147,7 +150,7 @@ void ParticleSystem::updatePressure(){
 
     particles[i].pressureForce += particles[i].viscosity;
     // Gravity
-    particles[i].pressureForce.y += 100.0f; 
+    particles[i].pressureForce.y += 100.0f;
 
     Vector2 mouse_pos = GetMousePosition();
     if ((isRepulsionOn || isAntiRepulsion) && Vector2Distance(particles[i].pos, mouse_pos) < settings::SMOOTHING_RAD*3)
@@ -159,6 +162,7 @@ void ParticleSystem::updateDensity(){
   float x, y;
   for (int i = 0; i < settings::N_PARTICLES; i++) {
     particles[i].density = 0;
+    particles[i].nearDensity = 0;
     x = (particles[i].pos.x/(float)settings::SCREEN_WIDTH)*settings::NChunksX;
     y = (particles[i].pos.y/(float)settings::SCREEN_HEIGHT)*settings::NChunksY;
     this->update(this->densityF, i, x, y);
@@ -244,7 +248,7 @@ void ParticleSystem::render(){
   for (int i = 0; i < settings::N_PARTICLES; i++) {
     pressure = settings::PRESSURE_MULT*(settings::TARGET_DENSITY-particles[i].density*10000.0f);
     trans_value = Vector2Length(particles[i].vel)*5.0f;
-    DrawCircleV(particles[i].pos, particles[i].density*10000.0f, {0, 0, 255, 125}); 
+    //DrawCircleV(particles[i].pos, particles[i].density*10000.0f, {0, 0, 255, 125}); 
     DrawCircleV(particles[i].pos, settings::SMOOTHING_RAD/3, {(unsigned char)trans_value, 0, (unsigned char)(255-trans_value), 255});
     /*if (pressure > 0)
       DrawCircleV(particles[i].pos, settings::PARTICLE_RAD/4, {trans_value, 0 ,trans_value, 255});
@@ -261,7 +265,7 @@ void ParticleSystem::renderUI(){
   ImGui::SliderFloat("Pressure mult:", &settings::PRESSURE_MULT, 0.0f, 10000.0f, "%.1f");
   ImGui::SliderFloat("Target density:", &settings::TARGET_DENSITY, 0.0f, 5.0f, "%.4f");
   ImGui::SliderFloat("VISCOSITY_STRENGTH:", &settings::VISCOSITY_STRENGTH, -100.0f, 100.0f, "%.4f");
-  ImGui::SliderFloat("Near pressure mult:", &settings::NEAR_PRESSURE_MULT, 0.0f, 10000.0f, "%.4f");
+  ImGui::SliderFloat("Near pressure mult:", &settings::NEAR_PRESSURE_MULT, -10000.0f, 10000.0f, "%.4f");
   settings::update();
 
 
@@ -271,12 +275,18 @@ void ParticleSystem::renderUI(){
   ImGui::Text("viscosity x at 66: %.3f %.3f", particles[mouseParticle].viscosity.x, particles[mouseParticle].viscosity.y);
   ImGui::Text("Velocity at 66: %.3f %.3f", particles[mouseParticle].vel.x, particles[mouseParticle].vel.y);
   ImGui::Text("Position x at 66: %.6f %.6f", particles[mouseParticle].pos.x, particles[mouseParticle].pos.y);
-  int x = (particles[mouseParticle].pos.x/(float)settings::SCREEN_WIDTH)*settings::NChunksX;
+  /*int x = (particles[mouseParticle].pos.x/(float)settings::SCREEN_WIDTH)*settings::NChunksX;
   int y = (particles[mouseParticle].pos.y/(float)settings::SCREEN_HEIGHT)*settings::NChunksY;
   x = std::max(0, std::min(x, settings::NChunksX-1));
   y = std::max(0, std::min(y, settings::NChunksY-1));
-  ImGui::Text("Miah: pos %.1f %.1f: %.1f", (float)x, (float)y, (float)this->chunks[x][y].len);
+  ImGui::Text("Miah: pos %.1f %.1f: %.1f", (float)x, (float)y, (float)this->chunks[x][y].len);*/
 
 
   ImGui::End(); // End window
+}
+
+float ParticleSystem::getDistance(int i, int j){
+  if ((i >= 0 && i < settings::N_PARTICLES) && (j >= 0 && j < settings::N_PARTICLES))
+    return Vector2Distance(this->particles[i].predPos, this->particles[j].predPos)*1.0f;
+  return 1;
 }

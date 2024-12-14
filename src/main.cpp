@@ -2,6 +2,7 @@
 #include "include/Settings.hpp"
 #include "raylib.h"
 #include "rlImGui.h"
+#include <iostream>
 
 
 int main(void){

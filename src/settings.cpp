@@ -16,13 +16,13 @@ float SpikyPow3DerScalingFactor;
 
 void init(){
   VISCOSITY_STRENGTH = 100.0;
-  SMOOTHING_RAD = 24.0f;
+  SMOOTHING_RAD = 19.0f;
   PARTICLE_MASS = 1.0f;
-  TARGET_DENSITY = 0.1f;
+  TARGET_DENSITY = 3.2f;
   PRESSURE_MULT = 2.0f;
   VOLUME_SR = (M_PI*std::pow(settings::SMOOTHING_RAD, 4))/6.0f;
   VOLUME_SV = M_PI*std::pow(SMOOTHING_RAD, 8)/4.0f;
-  NEAR_PRESSURE_MULT = 0.0f;
+  NEAR_PRESSURE_MULT = 1000.0f;
 }
 void update(){
   VOLUME_SR = (M_PI*std::pow(settings::SMOOTHING_RAD, 4))/6.0f;
