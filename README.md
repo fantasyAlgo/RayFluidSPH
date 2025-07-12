@@ -13,7 +13,7 @@ cd build
 build
 ./FluidSim
 ```
-Then, if you want a stable simulation, start with a low pressure, and increase it to the maximum after
+Then, if you want a stable simulation, increase the pressure multiplier, and return it back to normal when the simulation is settled
 ## Input
 - Q for pushing the particle inwards at the mouse coord 
 - E for push the particle outwards at the mouse coord
