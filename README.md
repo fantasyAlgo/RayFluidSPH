@@ -19,6 +19,7 @@ Then, if you want a stable simulation, increase the pressure multiplier, and ret
 - E for push the particle outwards at the mouse coord
 - R to reset the velocities
 - A to stop the simulation
+
 Click to one particle to see it's position, density, near-density, viscosity, pressure force and velocity
 ## Features
 It is essentially a worse copy of the beutiful Sebastian Lague [video](https://www.youtube.com/watch?v=rSKMYc1CQHE&t=2288s) on fluid simulation but in raylib and c++ (2d), it is also extremely prone to explode.
